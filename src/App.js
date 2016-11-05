@@ -1,34 +1,52 @@
 import React, { Component } from 'react';
-import { Motion, spring } from 'react-motion';
-import logo from './logo.svg';
+import { TransitionMotion, Motion, spring } from 'react-motion';
 import './App.css';
+import balls from './balls.js';
 
 const springSetting1 = {stiffness: 180, damping: 10};
 const springSetting2 = {stiffness: 120, damping: 17};
+const springSetting3 = {stiffness: 100, damping: 13};
 
 class Ball extends Component {
   constructor(props) {
     super(props);
     this.initX = parseInt(this.props.positionx);
     this.initY = parseInt(this.props.positiony);
-    this.radius = parseInt(this.props.radius);
     this.zIndex = parseInt(this.props.zIndex);
-    this.color = this.props.color;
 
     this.state = {
       x: this.initX,
       y: this.initY,
+      radius: randomRadius(),
       mouseEntered: false,
+      radiusChanging: false,
     }
 
     this.handleMouseEnter = this.handleMouseEnter.bind(this);
     this.handleMouseLeave = this.handleMouseLeave.bind(this);
   }
 
+  componentDidMount() {
+    setInterval(
+      () => this.changeRadius(),
+      300
+    );
+  }
+
+  changeRadius() {
+    if(!this.state.radiusChanging && Math.random() > .99) {
+      this.setState({ radiusChanging: true, radius: randomRadius() });
+    }
+  }
+
+  endRadiusChange() {
+    this.setState({ radiusChanging: false });
+  }
+
   handleMouseEnter(event) {
     this.setState({
-      x: this.state.x + this.initX + this.radius - event.clientX,
-      y: this.state.y + this.initY + this.radius - event.clientY,
+      x: this.state.x + this.initX + this.state.radius - event.clientX,
+      y: this.state.y + this.initY + this.state.radius - event.clientY,
       mouseEntered: true
     });
   }
@@ -46,12 +64,19 @@ class Ball extends Component {
     let translateY;
     let scale;
     let style;
+    let transition;
+    if(this.state.radiusChanging) {
+      setTimeout(
+        () => this.endRadiusChange(),
+        1000
+      );
+    }
     if(this.state.mouseEntered) {
       style = {
         translateX: spring(this.state.x, springSetting1),
         translateY: spring(this.state.y, springSetting1),
         scale: spring(1, springSetting1),
-        boxShadow: spring((this.state.x / 10 - (3 * this.radius*2 - 50) / 2) / 15, springSetting1),
+        boxShadow: spring((this.state.x / 10 - (3 * this.state.radius*2 - 50) / 2) / 15, springSetting1),
       }
     }
     else {
@@ -59,20 +84,27 @@ class Ball extends Component {
         translateX: spring(this.state.x, springSetting2),
         translateY: spring(this.state.y, springSetting2),
         scale: spring(1.2, springSetting2),
-        boxShadow: spring((this.state.x / 10- (3 * this.radius*2 - 50) / 2) / 15, springSetting1)
+        boxShadow: spring((this.state.x / 10- (3 * this.state.radius*2 - 50) / 2) / 15, springSetting1),
+        width: spring(this.state.radius*2, springSetting3),
+        height: spring(this.state.radius*2, springSetting3),
+        // color only updates when ANY state changes for now..
+        r: spring(randomRGBValue(), springSetting1),
+        g: spring(randomRGBValue(), springSetting1),
+        b: spring(randomRGBValue(), springSetting1)
       }
     }
     return (
       <div style={{left: this.initX, top: this.initY}}>
         <Motion style={style}> 
-          {({translateX, translateY, scale, boxShadow}) =>
+          {({translateX, translateY, scale, boxShadow, width, height, r, g, b}) =>
             <div onMouseEnter={this.handleMouseEnter}
               onMouseLeave={this.handleMouseLeave}
-              style={{backgroundColor: this.color,
-                  width: `${this.radius*2}px`,
-                  height: `${this.radius*2}px`,
+              style={{backgroundColor: `rgb(${r}, ${g}, ${b})`,
+                  width: `${width}px`,
+                  height: `${height}px`,
                   WebkitTransform: `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale})`,
                   transform: `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale})`,
+                  transition: `width 2s height 2s backgroundColor 2s`,
                   boxShadow: `${boxShadow}px 4px 4px rgba(0,0,0,0.3)`,
                   zIndex: this.zIndex }}
               className="Ball"
@@ -84,246 +116,29 @@ class Ball extends Component {
   }
 }
 
-const balls = [
-  // a
-  {
-    x: window.innerWidth*.05,
-    y: window.innerHeight*.55,
-    radius: randomRadius(),
-    color: randomColor(),
-    zIndex: randomZindex()
-  },
-  {
-    x: window.innerWidth*.064,
-    y: window.innerHeight*.49,
-    radius: randomRadius(),
-    color: randomColor(),
-    zIndex: randomZindex()
-  }, 
-  {
-    x: window.innerWidth*.09,
-    y: window.innerHeight*.46,
-    radius: randomRadius(),
-    color: randomColor(),
-    zIndex: randomZindex()
-  },
-  {
-    x: window.innerWidth*.12,
-    y: window.innerHeight*.48,
-    radius: randomRadius(),
-    color: randomColor(),
-    zIndex: randomZindex()
-  },
-  {
-    x: window.innerWidth*.132,
-    y: window.innerHeight*.53,
-    radius: randomRadius(),
-    color: randomColor(),
-    zIndex: randomZindex()
-  }, 
-  {
-    x: window.innerWidth*.118,
-    y: window.innerHeight*.585,
-    radius: randomRadius(),
-    color: randomColor(),
-    zIndex: randomZindex()
-  },
-  {
-    x: window.innerWidth*.09,
-    y: window.innerHeight*.615,
-    radius: randomRadius(),
-    color: randomColor(),
-    zIndex: randomZindex()
-  },
-  {
-    x: window.innerWidth*.065,
-    y: window.innerHeight*.6,
-    radius: randomRadius(),
-    color: randomColor(),
-    zIndex: randomZindex()
-  },
-  {
-    x: window.innerWidth*.145,
-    y: window.innerHeight*.61,
-    radius: randomRadius(),
-    color: randomColor(),
-    zIndex: randomZindex()
-  },
-  // l
-  {
-    x: window.innerWidth*.215,
-    y: window.innerHeight*.608,
-    radius: randomRadius(),
-    color: randomColor(),
-    zIndex: randomZindex()
-  },
-  {
-    x: window.innerWidth*.202,
-    y: window.innerHeight*.543,
-    radius: randomRadius(),
-    color: randomColor(),
-    zIndex: randomZindex()
-  },
-  {
-    x: window.innerWidth*.198,
-    y: window.innerHeight*.48,
-    radius: randomRadius(),
-    color: randomColor(),
-    zIndex: randomZindex()
-  },
-  {
-    x: window.innerWidth*.198,
-    y: window.innerHeight*.41,
-    radius: randomRadius(),
-    color: randomColor(),
-    zIndex: randomZindex()
-  },
-  {
-    x: window.innerWidth*.198,
-    y: window.innerHeight*.35,
-    radius: randomRadius(),
-    color: randomColor(),
-    zIndex: randomZindex()
-  },
-  {
-    x: window.innerWidth*.199,
-    y: window.innerHeight*.29,
-    radius: randomRadius(),
-    color: randomColor(),
-    zIndex: randomZindex()
-  },
-  // e
-  {
-    x: window.innerWidth*.28,
-    y: window.innerHeight*.533,
-    radius: randomRadius(),
-    color: randomColor(),
-    zIndex: randomZindex()
-  },
-  {
-    x: window.innerWidth*.29,
-    y: window.innerHeight*.48,
-    radius: randomRadius(),
-    color: randomColor(),
-    zIndex: randomZindex()
-  },
-  {
-    x: window.innerWidth*.315,
-    y: window.innerHeight*.46,
-    radius: randomRadius(),
-    color: randomColor(),
-    zIndex: randomZindex()
-  },
-  {
-    x: window.innerWidth*.341,
-    y: window.innerHeight*.482,
-    radius: randomRadius(),
-    color: randomColor(),
-    zIndex: randomZindex()
-  },
-  {
-    x: window.innerWidth*.337,
-    y: window.innerHeight*.533,
-    radius: randomRadius(),
-    color: randomColor(),
-    zIndex: randomZindex()
-  },
-  {
-    x: window.innerWidth*.31,
-    y: window.innerHeight*.545,
-    radius: randomRadius(),
-    color: randomColor(),
-    zIndex: randomZindex()
-  },
-  {
-    x: window.innerWidth*.285,
-    y: window.innerHeight*.585,
-    radius: randomRadius(),
-    color: randomColor(),
-    zIndex: randomZindex()
-  },
-  {
-    x: window.innerWidth*.31,
-    y: window.innerHeight*.623,
-    radius: randomRadius(),
-    color: randomColor(),
-    zIndex: randomZindex()
-  },
-  {
-    x: window.innerWidth*.343,
-    y: window.innerHeight*.618,
-    radius: randomRadius(),
-    color: randomColor(),
-    zIndex: randomZindex()
-  },
-  // c
-  {
-    x: window.innerWidth*.41,
-    y: window.innerHeight*.52,
-    radius: randomRadius(),
-    color: randomColor(),
-    zIndex: randomZindex()
-  },
-  {
-    x: window.innerWidth*.421,
-    y: window.innerHeight*.474,
-    radius: randomRadius(),
-    color: randomColor(),
-    zIndex: randomZindex()
-  },
-  {
-    x: window.innerWidth*.4435,
-    y: window.innerHeight*.45,
-    radius: randomRadius(),
-    color: randomColor(),
-    zIndex: randomZindex()
-  },
-  {
-    x: window.innerWidth*.464,
-    y: window.innerHeight*.483,
-    radius: randomRadius(),
-    color: randomColor(),
-    zIndex: randomZindex()
-  },
-  {
-    x: window.innerWidth*.4145,
-    y: window.innerHeight*.573,
-    radius: randomRadius(),
-    color: randomColor(),
-    zIndex: randomZindex()
-  },
-  {
-    x: window.innerWidth*.435,
-    y: window.innerHeight*.61,
-    radius: randomRadius(),
-    color: randomColor(),
-    zIndex: randomZindex()
-  },
-  {
-    x: window.innerWidth*.4625,
-    y: window.innerHeight*.607,
-    radius: randomRadius(),
-    color: randomColor(),
-    zIndex: randomZindex()
-  },/** 
-  {
-    x: window.innerWidth*.484,
-    y: window.innerHeight*.587,
-    radius: randomRadius(),
-    color: randomColor(),
-    zIndex: randomZindex()
-  },*/
-]
+class Nav extends Component {
+  render() {
+    return (
+      <nav>
+        <a href="https://linkedin.com/in/alectietjens" target="_">LinkedIn</a>
+        <a href="https://github.com/alectietjens" target="_">GitHub</a>
+        <a href="https://facebook.com/alec.tietjens" target="_">Facebook</a>
+        <a href="mailto:alec@tietjens.com">Email</a>
+        <a href="./AlecTietjensResume.pdf" target="_">Resume</a>
+      </nav>
+    )
+  }
+}
 
 class App extends Component {
   render() {
     return (
       <div className="App">
-      {balls.map((ball) =>
-        <Ball radius={ball.radius} positionx={ball.x}
+      <Nav />
+      {balls.map((ball, index) =>
+        <Ball positionx={ball.x} key={index}
             positiony={ball.y}
-            color={randomColor()} 
-            zIndex={ball.zIndex} />
+            zIndex={randomZindex()} />
       )}
       </div>
     );
@@ -332,29 +147,27 @@ class App extends Component {
 
 export default App;
 
-
 //------------ UTILITIES -------------
 function randomColor() {
-  const allColors = [
-    '#EF767A', '#456990', '#49BEAA', '#49DCB1', '#EEB868', '#EF767A', '#456990',
-    '#49BEAA', '#49DCB1', '#EEB868', '#EF767A',
-  ]
   const allColors2 = [
     '#249E86', '#109177', '#0E705D', '#065848', '#00352B', '#6232A9', '#4F1D9A',
     '#3F1878', '#2E0E5E', '#190438', '#F8E438', '#E2CE19', '#B0A016', '#8A7D09',
     '#534B00', '#F88438', '#E26819', '#B05316', '#8A3C09', '#532100'
   ]
-  const allColors3 = [
-    '#109177', '#4F1D9A', '#E2CE19', '#E26819'
-  ]
   let min = Math.ceil(0);
-  let max = Math.floor(allColors3.length);
-  return allColors3[Math.floor(Math.random() * (max - min)) + min];
+  let max = Math.floor(allColors2.length);
+  return allColors2[Math.floor(Math.random() * (max - min)) + min];
 }
 
 function randomZindex() {
   let min = Math.ceil(0);
   let max = Math.floor(20);
+  return Math.floor(Math.random() * (max - min)) + min;
+}
+
+function randomRGBValue() {
+  let min = Math.ceil(0);
+  let max = Math.floor(255);
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
