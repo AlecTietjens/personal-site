@@ -3,10 +3,12 @@ import { TransitionMotion, Motion, spring } from 'react-motion';
 import './App.css';
 import balls from './balls.js';
 
+// spring settings used for bubble movement and scaling
 const springSetting1 = {stiffness: 180, damping: 10};
 const springSetting2 = {stiffness: 120, damping: 17};
 const springSetting3 = {stiffness: 100, damping: 13};
 
+// ball class.. each ball individually has state
 class Ball extends Component {
   constructor(props) {
     super(props);
@@ -26,13 +28,15 @@ class Ball extends Component {
     this.handleMouseLeave = this.handleMouseLeave.bind(this);
   }
 
+  // set interval for change radius function
   componentDidMount() {
     setInterval(
       () => this.changeRadius(),
-      300
+      400
     );
   }
 
+  // 1% chance of changing radius every .4 seconds
   changeRadius() {
     if(!this.state.radiusChanging && Math.random() > .99) {
       this.setState({ radiusChanging: true, radius: randomRadius() });
@@ -43,6 +47,7 @@ class Ball extends Component {
     this.setState({ radiusChanging: false });
   }
 
+  // move ball/bubble in opoosite direction of enter
   handleMouseEnter(event) {
     this.setState({
       x: this.state.x + this.initX + this.state.radius - event.clientX,
@@ -51,6 +56,7 @@ class Ball extends Component {
     });
   }
 
+  // return ball when mouse leaves
   handleMouseLeave(event) {
     this.setState({
       x: this.initX,
@@ -59,6 +65,7 @@ class Ball extends Component {
     });
   }
 
+  // note: color is random and changes every time state changes
   render() {
     let translateX;
     let translateY;
@@ -116,6 +123,7 @@ class Ball extends Component {
   }
 }
 
+// nav menu
 class Nav extends Component {
   render() {
     return (
@@ -124,7 +132,7 @@ class Nav extends Component {
         <a href="https://github.com/alectietjens" target="_">GitHub</a>
         <a href="https://facebook.com/alec.tietjens" target="_">Facebook</a>
         <a href="mailto:alec@tietjens.com">Email</a>
-        <a href="./AlecTietjensResume.pdf" target="_">Resume</a>
+        <a href="http://tietjens.com/AlecTietjensResume.pdf" target="_">Résumé</a>
       </nav>
     )
   }
@@ -148,17 +156,6 @@ class App extends Component {
 export default App;
 
 //------------ UTILITIES -------------
-function randomColor() {
-  const allColors2 = [
-    '#249E86', '#109177', '#0E705D', '#065848', '#00352B', '#6232A9', '#4F1D9A',
-    '#3F1878', '#2E0E5E', '#190438', '#F8E438', '#E2CE19', '#B0A016', '#8A7D09',
-    '#534B00', '#F88438', '#E26819', '#B05316', '#8A3C09', '#532100'
-  ]
-  let min = Math.ceil(0);
-  let max = Math.floor(allColors2.length);
-  return allColors2[Math.floor(Math.random() * (max - min)) + min];
-}
-
 function randomZindex() {
   let min = Math.ceil(0);
   let max = Math.floor(20);

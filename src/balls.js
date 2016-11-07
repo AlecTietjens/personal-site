@@ -1,3 +1,4 @@
+// hoping to find a new way to generate locations of balls
 const balls = [
   // a
   {

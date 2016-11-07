@@ -1,3 +1,4 @@
+/* clean soon */
 .App {
   text-align: center;
 }
@@ -25,6 +26,7 @@ a {
   margin-right: 10px;
   text-decoration: none;
   color:rgb(22, 65, 173);
+  font-size:.75em;
 }
 
 a:visited {
